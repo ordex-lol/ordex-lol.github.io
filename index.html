@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <button id="connect-btn">
+        Connect Wallet
+    </button>
+    <script>
+        const { Connection, PublicKey } = solanaWeb3;
+        const connection = new Connection("https://solana-rpc.publicnode.com", "confirmed");
+
+        let provider = null;
+        let signer = null;
+
+        const dappUrl = 'https://ordex-lol.github.io/';
+        const encodedUrl = encodeURIComponent(dappUrl);
+        const phantomDeepLink = `https://phantom.app/ul/browse/${encodedUrl}?ref=${encodedUrl}`;
+
+        function isMobile() {
+            return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        }
+
+        function updateUI() {
+            const btn = document.getElementById('connect-btn');
+            btn.innerText = signer ? signer.toString() : "Connect Wallet";
+        }
+
+        async function connectWallet(auto = false) {
+            const btn = document.getElementById("connect-btn");
+
+            try {
+                // ✅ Check if Phantom is available
+                if (!window.solana?.isPhantom) {
+                    if (!auto && isMobile()) {
+                        // Redirect only if user clicked manually on mobile
+                        window.location.href = phantomDeepLink;
+                    } else if (!auto) {
+                        alert("Phantom not found. Please install it from https://phantom.app");
+                    }
+                    return;
+                }
+
+                provider = window.solana;
+
+                const res = await provider.connect(auto ? { onlyIfTrusted: true } : {});
+                signer = res.publicKey;
+                updateUI();
+
+                // 🔄 Set up event listener only once
+                if (!auto) setupListeners();
+
+            } catch (err) {
+                console.error("Wallet connection failed:", err);
+                signer = null;
+                updateUI();
+
+                if (!auto && isMobile()) {
+                    window.location.href = phantomDeepLink;
+                }
+            }
+        }
+
+        function setupListeners() {
+            provider.on("accountChanged", (pubkey) => {
+                signer = pubkey || null;
+                updateUI();
+                console.log("Account changed:", signer?.toString() || "Disconnected");
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("connect-btn").onclick = () => connectWallet(false);
+            connectWallet(true); // attempt auto-connect
+        });
+
+    </script>
+</body>
+
+</html>
