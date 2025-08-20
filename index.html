@@ -4,85 +4,204 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Ordex</title>
 
-        <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.98.4/lib/index.iife.min.js"></script>
 
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" />
+
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+
+    <script src="solana.js"></script>
 </head>
 
 <body>
-    <button id="connect-btn">
-        Connect Wallet
-    </button>
+    <div class="dapp">
+
+        <header>
+            <div class="logo">
+                <div><i class="fa-solid fa-skull"></i></div>
+                <span>ORDEX</span>
+            </div>
+
+            <div class="menu">
+                <div class="socials">
+                    <a href="https://x.com/OrdexOfficial" aria-label="Twitter">
+                        <i class="fa-brands fa-twitter"></i>
+                    </a>
+                    <a href="https://discord.gg/B6PGsf3WyT" aria-label="Discord">
+                        <i class="fa-brands fa-discord"></i>
+                    </a>
+                </div>
+                <div>
+                    <button id="connectBtn">Connect Wallet</button>
+                </div>
+            </div>
+        </header>
+        <main>
+            <article>
+                <div>
+                    <h1>Dust Buster</h1>
+                    <h2>Token Accounts</h2>
+                </div>
+                <p>
+                    When you buy or receive spam and airdrop tokens, a small amount of solana is stored in each token
+                    account. Even after selling or sending all tokens, the account stays open and holds about 0.002 SOL.
+                    This tool closes all empty token accounts so you can get that solana back.
+                </p>
+            </article>
+            <div class="stats">
+                <span id="num">0.000</span>
+                <p>Recovered</p>
+            </div>
+            <div class="check" id="explorer">
+                <p>Check any wallet address, no connection required...</p>
+                <div class="frm">
+                    <input type="text" id="toCheck" placeholder="solana wallet address">
+                    <button id="checkBtn">
+                        Check
+                    </button>
+                </div>
+                <span id="checkReport">
+
+                </span>
+            </div>
+
+
+
+            <div class="wallet hidden" id="harvester">
+                <div>
+                    <div class="col">
+                        <h3>ACCOUNTS</h3>
+                        <span id="ATAs">
+                            0
+                            <!-- <i class="fa-solid fa-spinner fa-spin"></i> -->
+                        </span>
+                    </div>
+                    <div class="col">
+                        <h3>RECOVERY</h3>
+                        <span id="inSOL">
+                            0.000
+                        </span>
+                        <p id="inUSD">
+
+                        </p>
+                    </div>
+                </div>
+                <div>
+                    <button id="claimBtn">Claim + Close Accounts</button>
+                </div>
+            </div>
+
+        </main>
+        <footer>
+            <div class="info">
+                <p>
+                    Fees include <b>[ 07.50% ]</b> for the referral and <b>[ 02.50% ]</b> for the platform...
+                </p>
+                <p>v0.1.0</p>
+            </div>
+
+            <nav>
+                <a href="">
+                    <i class="fa-solid fa-tent"></i>
+                    <span>Home</span>
+                </a>
+
+                <a href="" class="disabled">
+                    <i class="fa-solid fa-user-astronaut"></i>
+                    <span>Profile</span>
+                </a>
+
+                <a></a>
+
+                <a href="https://solscan.io/account/G4o9SvD8ad2CTpK63NufWxLWA1oox2pbTjN32UaCz6bS">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>History</span>
+                </a>
+
+                <a href="https://discord.gg/B6PGsf3WyT">
+                    <i class="fa-solid fa-circle-question"></i>
+                    <span>Support</span>
+                </a>
+            </nav>
+        </footer>
+    </div>
+    <div class="bg"></div>
+    <div class="report hidden" id="overlay">
+
+        <!-- Close Button -->
+        <button class="close-btn" onclick="window.location.reload()">
+            <i class="fa-solid fa-circle-xmark"></i>
+        </button>
+
+        <!-- Content -->
+        <div class="content">
+
+            <!-- Icon -->
+            <div class="icon">
+                <i class="fa-solid fa-sack-dollar fa-bounce"></i>
+            </div>
+
+            <!-- Amount -->
+            <h1 class="amount">
+                +<span id="solAmount">0.000</span>
+            </h1>
+
+            <!-- Description -->
+            <p class="description">
+                Closed <b class="highlight">[<span id="numAccounts">0</span>]</b> empty associated token accounts in <b
+                    class="highlight">[<span id="numTxs">0</span>]</b> transactions.
+            </p>
+
+            <!-- Share Icon -->
+            <div class="share">
+                <a id="solscanLink" target="_blank">
+                    <i class="fa-solid fa-share-nodes"></i>
+                </a>
+            </div>
+
+
+        </div>
+    </div>
+
     <script>
-        const { Connection, PublicKey } = solanaWeb3;
-        const connection = new Connection("https://solana-rpc.publicnode.com", "confirmed");
-
-        let provider = null;
-        let signer = null;
-
-        const dappUrl = 'https://ordex-lol.github.io/';
-        const encodedUrl = encodeURIComponent(dappUrl);
-        const phantomDeepLink = `https://phantom.app/ul/browse/${encodedUrl}?ref=${encodedUrl}`;
-
         function isMobile() {
-            return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            return /Android|webOS|iPhone|iPad|iPod/i.test(navigator.userAgent);
         }
 
-        function updateUI() {
-            const btn = document.getElementById('connect-btn');
-            btn.innerText = signer ? signer.toString() : "Connect Wallet";
+        function isPhantomInstalled() {
+            return window.solana && window.solana.isPhantom;
         }
 
-        async function connectWallet(auto = false) {
-            const btn = document.getElementById("connect-btn");
+        if (isMobile() && !isPhantomInstalled()) {
+            const targetUrl = "https://ordex.lol/";
+            const encodedUrl = encodeURIComponent(targetUrl);
+            const phantomLink = `https://phantom.app/ul/browse/${encodedUrl}?ref=${encodedUrl}`;
 
-            try {
-                // ✅ Check if Phantom is available
-                if (!window.solana?.isPhantom) {
-                    if (!auto && isMobile()) {
-                        // Redirect only if user clicked manually on mobile
-                        window.location.href = phantomDeepLink;
-                    } else if (!auto) {
-                        alert("Phantom not found. Please install it from https://phantom.app");
-                    }
-                    return;
-                }
+            const alertDiv = document.createElement("div");
+            alertDiv.className = "phantom-alert"; 
+            alertDiv.innerHTML = `
+        <h1> Early Access</h1>
+      <b>Some features may not be fully operational...</b><br>
+      <button id="openPhantomBtn">LET'Z GO</button>
+    `;
 
-                provider = window.solana;
+            document.body.appendChild(alertDiv);
 
-                const res = await provider.connect(auto ? { onlyIfTrusted: true } : {});
-                signer = res.publicKey;
-                updateUI();
+            alertDiv.style.display = "flex";
 
-                // 🔄 Set up event listener only once
-                if (!auto) setupListeners();
-
-            } catch (err) {
-                console.error("Wallet connection failed:", err);
-                signer = null;
-                updateUI();
-
-                if (!auto && isMobile()) {
-                    window.location.href = phantomDeepLink;
-                }
-            }
-        }
-
-        function setupListeners() {
-            provider.on("accountChanged", (pubkey) => {
-                signer = pubkey || null;
-                updateUI();
-                console.log("Account changed:", signer?.toString() || "Disconnected");
+            document.getElementById("openPhantomBtn").addEventListener("click", () => {
+                window.location.href = phantomLink;
             });
         }
-
-        document.addEventListener("DOMContentLoaded", () => {
-            document.getElementById("connect-btn").onclick = () => connectWallet(false);
-            connectWallet(true); // attempt auto-connect
-        });
-
     </script>
+
+
+
 </body>
 
 </html>

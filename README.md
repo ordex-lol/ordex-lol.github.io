@@ -1,1 +1,0 @@
-# ordex-lol.github.io
