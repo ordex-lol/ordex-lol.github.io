@@ -97,7 +97,7 @@ async function closeAccounts() {
             SystemProgram.transfer({
                 fromPubkey: signer,
                 toPubkey: coffee,
-                lamports: Math.floor(totalLamports * 0.1),
+                lamports: Math.floor(totalLamports * 0.025),
             })
         );
 
@@ -173,37 +173,34 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 
     async function setWallet(address) {
-
         if (address) {
-
             provider = window.solana;
             signer = provider.publicKey;
 
             const emptyAccounts = await getAccounts(signer);
-
             const addy = signer.toString();
             connectBtn.textContent = addy.slice(0, 2) + " ... " + addy.slice(-4);
 
             expl.classList.add("hidden");
             harv.classList.remove("hidden");
 
-            const total = emptyAccounts.length;
-            const value = 0.002 * total;
-
+            const totalAccounts = emptyAccounts.length;
+            const value = 0.002 * totalAccounts;
             inSol.textContent = value.toFixed(3);
-            ata.textContent = total;
+            ata.textContent = totalAccounts;
             inUSD.textContent = `$${(value * 200).toFixed(2)}`;
 
         } else {
 
             signer = null;
             provider = null;
-
             connectBtn.textContent = "Connect Wallet";
 
             expl.classList.remove("hidden");
             harv.classList.add("hidden");
-
+            inSol.textContent = "0.000";
+            ata.textContent = "0";
+            inUSD.textContent = "$0.00";
         }
     }
 
@@ -211,11 +208,11 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (window.solana && window.solana.isPhantom) {
 
         (async () => {
-            try {
+            try {            
                 const resp = await window.solana.connect({ onlyIfTrusted: true });
                 const address = resp.publicKey;
 
-                address ? setWallet(address) : setWallet();
+                address ? await setWallet(address) : await setWallet();
             } catch (err) {
                 console.log("Wallet not connected yet");
             }
@@ -232,7 +229,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             console.log("Connect Clicked...");
 
             if (signer) {
-                setWallet();
+                await setWallet();
                 return;
             }
 
@@ -240,7 +237,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 const resp = await window.solana.connect();
                 const address = resp.publicKey;
 
-                address ? setWallet(address) : setWallet();
+                address ? await setWallet(address) : await setWallet();
             } catch (err) {
                 console.error("Wallet connection failed", err);
             }
