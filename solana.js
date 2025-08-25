@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (window.solana && window.solana.isPhantom) {
 
         (async () => {
-            try {            
+            try {
                 const resp = await window.solana.connect({ onlyIfTrusted: true });
                 const address = resp.publicKey;
 
@@ -248,6 +248,28 @@ document.addEventListener('DOMContentLoaded', async function () {
         connectBtn.textContent = "wallet not found";
     }
 
+
+
+    function isMobile() {
+        return /Android|webOS|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    }
+
+    function isPhantomInstalled() {
+        return window.solana && window.solana.isPhantom;
+    }
+
+    if (isMobile() && !isPhantomInstalled()) {
+        const targetUrl = "https://ordex.lol/";
+        const encodedUrl = encodeURIComponent(targetUrl);
+        const phantomLink = `https://phantom.app/ul/browse/${encodedUrl}?ref=${encodedUrl}`;
+
+        connectBtn.addEventListener("click", () => {
+            window.location.href = phantomLink;
+        });
+
+        connectBtn.textContent = "Launch Dapp";
+
+    }
 
 
 
