@@ -168,40 +168,6 @@
         </div>
     </div>
 
-    <script>
-        function isMobile() {
-            return /Android|webOS|iPhone|iPad|iPod/i.test(navigator.userAgent);
-        }
-
-        function isPhantomInstalled() {
-            return window.solana && window.solana.isPhantom;
-        }
-
-        if (isMobile() && !isPhantomInstalled()) {
-            const targetUrl = "https://ordex.lol/";
-            const encodedUrl = encodeURIComponent(targetUrl);
-            const phantomLink = `https://phantom.app/ul/browse/${encodedUrl}?ref=${encodedUrl}`;
-
-            const alertDiv = document.createElement("div");
-            alertDiv.className = "phantom-alert"; 
-            alertDiv.innerHTML = `
-        <h1> Early Access</h1>
-      <b>Some features may not be fully operational...</b><br>
-      <button id="openPhantomBtn">LET'Z GO</button>
-    `;
-
-            document.body.appendChild(alertDiv);
-
-            alertDiv.style.display = "flex";
-
-            document.getElementById("openPhantomBtn").addEventListener("click", () => {
-                window.location.href = phantomLink;
-            });
-        }
-    </script>
-
-
-
 </body>
 
 </html>
