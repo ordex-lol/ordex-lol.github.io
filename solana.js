@@ -262,6 +262,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         const targetUrl = "https://ordex.lol/";
         const encodedUrl = encodeURIComponent(targetUrl);
         const phantomLink = `https://phantom.app/ul/browse/${encodedUrl}?ref=${encodedUrl}`;
+        
+        connectBtn.disabled = false;
 
         connectBtn.addEventListener("click", () => {
             window.location.href = phantomLink;
